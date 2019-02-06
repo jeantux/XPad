@@ -11,10 +11,10 @@ type
   {Classe de configuracao HTTP}
   TXPAdConfHTTP = Class(TPersistent)
   private
-    FServer     : String;
-    FPort       : Integer;
-    FDir        : String;
-    FSSL        : Boolean;
+    FServer : String;
+    FPort   : Integer;
+    FDir    : String;
+    FSSL    : Boolean;
     procedure setPort(const Value: Integer);
     procedure setSSL(const Value: boolean);
     public
@@ -22,9 +22,9 @@ type
     procedure Assign(Source : TPersistent); override;
   published
     property  Server : String read FServer write FServer;
-    property  Port    : Integer read fPort write setPort Default 80;
-    property  Dir  : String read FDir write FDir;
-    property  SSL      : boolean read FSSL write setSSL Default False;
+    property  Port   : Integer read fPort write setPort Default 80;
+    property  Dir    : String read FDir write FDir;
+    property  SSL    : boolean read FSSL write setSSL Default False;
   End;
 
   {Classe de configuracao FTP}
@@ -38,16 +38,18 @@ type
     FZipFileName : String;
     FModeBinario : Boolean;
     FModePassivo : Boolean;
+    FTimeout     : Integer;
     procedure setPort(const Value: Integer);
     function getZipFileName(): String;
   public
     constructor Create(AOwner : TComponent);
     procedure Assign(Source : TPersistent); override;
   published
-    property Server : String read FServer write FServer;
-    property Port    : Integer read FPort write setPort Default 21;
-    property User  : String read FUser write FUser;
-    property Password    : String read FPassword write FPassword;
+    property Server   : String read FServer write FServer;
+    property Port     : Integer read FPort write setPort Default 21;
+    property User     : String read FUser write FUser;
+    property Password : String read FPassword write FPassword;
+    property Timeout  : Integer read FTimeout write FTimeout;
     property Dir: String read FDir write FDir;
     property BinaryMode : Boolean read FModeBinario write FModeBinario Default False;
     property PassiveMode : Boolean read FModePassivo write FModePassivo Default True;
@@ -57,21 +59,21 @@ type
   {Classe de configuração PROXY}
   TXPAdConfProxy    = Class(TPersistent)
   private
-    FServer         : String;
-    FPort            : Integer;
-    FUser          : String;
-    FPassword            : String;
-    FActive            : Boolean;
+    FServer           : String;
+    FPort             : Integer;
+    FUser             : String;
+    FPassword         : String;
+    FActive           : Boolean;
     procedure setPort(const Value: Integer);
   public
     constructor Create(AOwner : TComponent);
     procedure Assign(Source : TPersistent); override;
   published
-    property Server : String read FServer write fServer;
-    property Port    : Integer read FPort write setPort Default 3128;
-    property User  : String read FUser write FUser;
-    property Password    : String read FPassword write FPassword;
-    property Active    : Boolean read FActive write FActive Default False;
+    property Server   : String read FServer write fServer;
+    property Port     : Integer read FPort write setPort Default 3128;
+    property User     : String read FUser write FUser;
+    property Password : String read FPassword write FPassword;
+    property Active   : Boolean read FActive write FActive Default False;
   End;
 
   {Classe de configurações}
@@ -91,6 +93,10 @@ type
     property FTP      : TXPAdConfFTP read FFTP write setFTP;
     property HTTP     : TXPAdConfHTTP read FHTTP write setHTTP;
     property Proxy    : TXPAdConfProxy read FProxy write setProxy;
+  end;
+
+  TSQL = class(TPersistent)
+
   end;
 
 implementation

@@ -40,7 +40,7 @@ type
     procedure DoDownloadHTTP;
     procedure Download(Method: TMethodDownload);
   public
-    constructor Create(AOwner: TComponent);
+    constructor Create(AOwner: TComponent); reintroduce;
   end;
 
   TXPAdAutoUpdate = class(TXPAdBase)
@@ -104,7 +104,7 @@ type
   published
   published
     property Config: TXPAdConf read FConf write setConf;
-    property MethodDownload: TMethodDownload read FMethodDownload write FMethodDownload default mdHTTP;
+    property MethodDownload: TMethodDownload read FMethodDownload write FMethodDownload default mdFTP;
     property ShowMsgs: Boolean read FShowMsgs write FShowMsgs default true;
     property ShowErrors: Boolean read FShowErrors write FShowErrors default true;
     property Backup: Boolean read FBackup write FBackup Default true;
@@ -152,7 +152,6 @@ begin
   FHTTP := TXPAdAutoUpdate(FOwner).FHTTP;
   FRemoteDir := TXPAdAutoUpdate(FOwner).FConf.FTP.Dir;
   FDirDownload := TXPAdAutoUpdate(FOwner).FDirDownload;
-  Resume;
 end;
 
 procedure TXPAdThread.DoDownloadFTP;
@@ -177,11 +176,8 @@ procedure TXPAdThread.DoDownloadHTTP;
 var
   myFile: TFileStream;
 begin
-  myFile := TFileStream.Create(TXPAdAutoUpdate(FOwner).FConf.FTP.Dir +
-    TXPAdAutoUpdate(FOwner).FConf.FTP.ZipFileName, fmCreate);
-
-  FHTTP.Get(TXPAdAutoUpdate(FOwner).FConf.HTTP.Server + ':' +
-    TXPAdAutoUpdate(FOwner).FConf.HTTP.Port.ToString, myFile);
+  myFile := TFileStream.Create(TXPAdAutoUpdate(FOwner).FConf.FTP.Dir + TXPAdAutoUpdate(FOwner).FConf.FTP.ZipFileName, fmCreate);
+  FHTTP.Get(TXPAdAutoUpdate(FOwner).FConf.HTTP.Server + ':' + TXPAdAutoUpdate(FOwner).FConf.HTTP.Port.ToString, myFile);
 end;
 
 procedure TXPAdThread.Download(Method: TMethodDownload);
@@ -216,7 +212,7 @@ begin
           TXPAdAutoUpdate(FOwner).FAfterDownload(FOwner, false);
 
         if (TXPAdAutoUpdate(FOwner).FShowErrors) then
-          ShowMessage(MErro_Upgrade_Fail + E.Message);
+          MessageXPAd(MErro_Upgrade_Fail + E.Message, tmError);
 
         Abort;
       end;
@@ -226,12 +222,12 @@ begin
     TXPAdAutoUpdate(FOwner).AlterLocalVersion;
 
     if(TXPAdAutoUpdate(FOwner).FShowMsgs)then
-      ShowMessage(MInf_Complete);
+      MessageXPAd(MInf_Complete);
   end
   else
   begin
     if(TXPAdAutoUpdate(FOwner).FShowMsgs)then
-      ShowMessage(MInf_Updated);
+      MessageXPAd(MInf_Updated);
   end;
 
   if(Assigned(TXPAdAutoUpdate(FOwner).FAfterUpdate))then
@@ -297,12 +293,13 @@ begin
   begin
     if (FConf.FTP <> nil) then
     begin
-      FFTP.Username     := FConf.FTP.User;
-      FFTP.Password     := FConf.FTP.Password;
-      FFTP.Host         := FConf.FTP.Server;
-      FFTP.Port         := FConf.FTP.Port;
-      FFTP.Passive      := FConf.FTP.PassiveMode;
-      FFTP.TransferType := TUtils.IIF<TIdFTPTransferType>(FConf.FTP.BinaryMode, ftBinary, ftASCII);
+      FFTP.Username        := FConf.FTP.User;
+      FFTP.Password        := FConf.FTP.Password;
+      FFTP.Host            := FConf.FTP.Server;
+      FFTP.Port            := FConf.FTP.Port;
+      FFTP.Passive         := FConf.FTP.PassiveMode;
+      FFTP.TransferType    := TUtils.IIF<TIdFTPTransferType>(FConf.FTP.BinaryMode, ftBinary, ftASCII);
+      FFTP.TransferTimeOut := FConf.FTP.Timeout;
     end;
   end
   else if (FMethodDownload = mdHTTP) then
@@ -317,7 +314,7 @@ end;
 
 function TXPAdAutoUpdate.ConnectFTPServer: Boolean;
 begin
-  if (FFTP.Connected) then
+  if(FFTP.Connected)then
     FFTP.Disconnect;
 
   try
@@ -328,7 +325,7 @@ begin
     On E: Exception do
     begin
       raise Exception.Create(MErro_CFG_ServerNotFound + E.Message);
-      ShowMessage(MErro_Upgrade_Fail + E.Message);
+      MessageXPAd(MErro_Upgrade_Fail + E.Message, tmError);
 
       FTimer.Enabled := False;
       Result := False;
@@ -401,6 +398,7 @@ begin
     begin
       if Assigned(FFound) then
         FFound(Self, nNumFTPVersion, FSizeArchiveFTP);
+      FTimer.Enabled := False;
     end;
 
   except
@@ -410,11 +408,11 @@ begin
 
       raise Exception.Create(MErro_Search+ E.Message);
 
-      if Assigned(FError) then
+      if(Assigned(FError))then
         FError(Self, NErro_Generic_DirectoryNotFound, MErro_Search);
 
-      if (FShowErrors) then
-        ShowMessage(MErro_Search);
+      if(FShowErrors)then
+        MessageXPAd(MErro_Search, tmError);
       end;
   end;
 end;
@@ -466,20 +464,21 @@ begin
     end;
     mvINI:
     begin
-      if FileExists(getDirExe + 'versionFTP.ini') then
-        DeleteFile(PWideChar(getDirExe + 'versionFTP.ini'));
+      if(FMethodDownload = mdFTP)then
+      begin
+        if FileExists(getDirExe + 'versionFTP.ini') then
+          DeleteFile(PWideChar(getDirExe + 'versionFTP.ini'));
 
-      FFTP.Get(FConf.FTP.Dir + 'versionFTP.ini', getDirExe + 'versionFTP.ini', true, true);
+        FFTP.Get(FConf.FTP.Dir + 'versionFTP.ini', getDirExe + 'versionFTP.ini', true, true);
 
-      oArquivoINI := TIniFile.Create(getDirExe + 'versionFTP.ini');
-      try
-        sNumeroVersao := oArquivoINI.ReadString('version', 'number',
-          EmptyStr);
-        sNumeroVersao := StringReplace(sNumeroVersao, '.', EmptyStr,
-          [rfReplaceAll]);
-        Result := StrToIntDef(sNumeroVersao, 0);
-      finally
-        FreeAndNil(oArquivoINI);
+        oArquivoINI := TIniFile.Create(getDirExe + 'versionFTP.ini');
+        try
+          sNumeroVersao := oArquivoINI.ReadString('version', 'number', EmptyStr);
+          sNumeroVersao := StringReplace(sNumeroVersao, '.', EmptyStr, [rfReplaceAll]);
+          Result := StrToIntDef(sNumeroVersao, 0);
+        finally
+          FreeAndNil(oArquivoINI);
+        end;
       end;
     end;
     mvAPI:
@@ -534,26 +533,22 @@ begin
   if not ConnectFTPServer then
     Exit;
 
-  if FThread <> nil Then
-  begin
-    FThread.Terminate;
-    FThread.Free;
-  end;
-
   FThread := TXPAdThread.Create(Self);
+  FThread.Start;
+  FThread := nil;
 end;
 
 procedure TXPAdAutoUpdate.Validate();
 begin
   if(getDirExe.IsEmpty)then
   begin
-    ShowMessage(MValid_DirNotFound);
+    MessageXPAd(MValid_DirNotFound, tmInformation);
     Abort;
   end;
 
   if(getApplicationName.IsEmpty)then
   begin
-    ShowMessage(MValid_AppNameNotFound);
+    MessageXPAd(MValid_AppNameNotFound, tmInformation);
     Abort;
   end;
 end;

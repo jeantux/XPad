@@ -2,6 +2,9 @@ unit XPAdAutoUpdateMessages;
 
 interface
 
+type
+TTypeMessage = (tmInformation, tmWarning, tmError);
+
 const
   NErro_Generic_FileNotFound            = 1;
   NErro_Generic_DirectoryNotFound       = 2;
@@ -81,6 +84,27 @@ resourcestring
   MValid_DirNotFound                    = 'Diretorio do Executavel não informado!';
   MValid_AppNameNotFound                = 'Nome da aplicação não informada!';
 
+procedure MessageXPAd(AMessage: String; ATypeMessage: TTypeMessage = tmInformation);
+function QuestionYesNo(cMensg: String; Afocus: Boolean = False): Boolean;
+
 implementation
+
+uses
+  Vcl.Forms, Winapi.Windows, XPAdMethods;
+
+procedure MessageXPAd(AMessage: String; ATypeMessage: TTypeMessage = tmInformation);
+begin
+  case ATypeMessage of
+    tmError     :  Application.MessageBox(PWideChar(AMessage), 'Erro'      , MB_OK + MB_ICONERROR       + MB_TOPMOST);
+    tmWarning   :  Application.MessageBox(PWideChar(AMessage), 'Atenção'   , MB_OK + MB_ICONWARNING     + MB_TOPMOST);
+    tmInformation: Application.MessageBox(PWideChar(AMessage), 'Informação', MB_OK + MB_ICONINFORMATION + MB_TOPMOST);
+  end;
+end;
+
+
+function questionYesNo(cMensg: String; Afocus: Boolean = False): Boolean;
+begin
+  Result := (Application.MessageBox(PWidechar(cMensg),'Atenção', MB_YESNO + MB_ICONQUESTION + TUtils.IIF<Integer>(Afocus, MB_DEFBUTTON1, MB_DEFBUTTON2) + MB_TOPMOST) = 6);
+end;
 
 end.
