@@ -1,6 +1,6 @@
 <img src="https://github.com/jeaanca/delphi-auto-update/blob/master/xpad.png"><br>
 # Componente de atualização automática
-*A [Featware](https://featware.com/#/contato) é uma empresa que mantém o projeto e oferece diversos serviços para escalar se negócio.* <br><br>
+*A [Featware](https://featware.com/#/contato) é uma empresa que mantém o projeto e oferece diversos serviços para escalar seu negócio.* <br><br>
 Xpad é um componente de atualização automática para ser utilizado no delphi, esse componente foi testado no delphi 10.1 (Berlin) e em versões superiores.<br>
 
 No projeto é disponibizado duas versões, a primeira é uma versão simplificada [autoUpdate/autoUpdate.pas](https://github.com/jeaanca/delphi-auto-update/tree/master/autoUpdate) e é disponibilizada em um único arquivo. <br>
