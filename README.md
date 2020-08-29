@@ -1,4 +1,7 @@
-# XPAd - Delphi auto update
+<img src="https://github.com/jeaanca/delphi-auto-update/blob/master/xpad.png"><br>
+# Componente de atualização automática
+
+## 
 
 ## Configuration 
 * Realizar o download do componente
