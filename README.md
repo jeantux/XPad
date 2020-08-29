@@ -14,7 +14,7 @@ Sem contar que é um componente facilmente extensivel.
 
 ## Configuração
 * Realizar o download do componente
-* Instalar componente no delphi (Como é feita a instalação manualmente)
+* Instalar componente no delphi (instalação manual)
 
 ## Casos de sucesso
 | Empresa  |  Nº Usuários| Opnião da Empresa |
